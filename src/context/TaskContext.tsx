@@ -11,6 +11,7 @@ export interface Task {
   completed: boolean;
   priority: "High" | "Medium" | "Low";
   dueDate?: string;
+  status?: "todo" | "inprogress" | "done";
 }
 
 // ===============================
@@ -20,6 +21,7 @@ export interface Task {
 interface TaskContextType {
   tasks: Task[];
   addTask: (task: Task) => void;
+  updateTask: (task: Task) => void;
   toggleTask: (id: string) => void;
   deleteTask: (id: string) => void;
 }
@@ -42,22 +44,21 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
     return saved ? JSON.parse(saved) : [];
   });
 
-  // Save to localStorage whenever tasks change
   useEffect(() => {
     localStorage.setItem("tasks", JSON.stringify(tasks));
   }, [tasks]);
-
-  // ===============================
-  // ADD TASK
-  // ===============================
 
   const addTask = (task: Task) => {
     setTasks((prev) => [...prev, task]);
   };
 
-  // ===============================
-  // TOGGLE COMPLETE
-  // ===============================
+  const updateTask = (updatedTask: Task) => {
+    setTasks((prev) =>
+      prev.map((task) =>
+        task.id === updatedTask.id ? updatedTask : task
+      )
+    );
+  };
 
   const toggleTask = (id: string) => {
     setTasks((prev) =>
@@ -69,17 +70,13 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
     );
   };
 
-  // ===============================
-  // DELETE TASK
-  // ===============================
-
   const deleteTask = (id: string) => {
     setTasks((prev) => prev.filter((task) => task.id !== id));
   };
 
   return (
     <TaskContext.Provider
-      value={{ tasks, addTask, toggleTask, deleteTask }}
+      value={{ tasks, addTask, updateTask, toggleTask, deleteTask }}
     >
       {children}
     </TaskContext.Provider>
@@ -97,5 +94,6 @@ export const useTasks = () => {
   }
   return context;
 };
+
 
 

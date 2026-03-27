@@ -1,93 +1,102 @@
 import { useState } from "react";
 import { useTasks } from "../context/TaskContext";
+import type { Task } from "../context/TaskContext";
 
-interface AddTaskModalProps {
+interface Props {
   onClose: () => void;
+  existingTask?: Task;
 }
 
-const AddTaskModal: React.FC<AddTaskModalProps> = ({ onClose }) => {
-  const { addTask } = useTasks();
+const AddTaskModal = ({ onClose, existingTask }: Props) => {
+  const { addTask, updateTask } = useTasks();
 
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [priority, setPriority] = useState<"High" | "Medium" | "Low">("Medium");
-  const [dueDate, setDueDate] = useState("");
+  const [title, setTitle] = useState(existingTask?.title || "");
+  const [description, setDescription] = useState(existingTask?.description || "");
+  const [priority, setPriority] = useState<"High" | "Medium" | "Low">(
+    existingTask?.priority || "Medium"
+  );
+  const [dueDate, setDueDate] = useState(existingTask?.dueDate || "");
 
   const handleSubmit = () => {
     if (!title.trim()) return;
 
-    addTask({
-      id: Date.now().toString(),
+    const task: Task = {
+      id: existingTask?.id || Date.now().toString(),
       title,
       description,
       priority,
       dueDate,
-      completed: false,
-    });
+      completed: existingTask?.completed || false,
+    };
+
+    if (existingTask) {
+      updateTask(task);
+    } else {
+      addTask(task);
+    }
 
     onClose();
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-slate-900 p-8 rounded-2xl w-full max-w-md shadow-2xl">
-        <h2 className="text-2xl font-semibold mb-6 text-white">
-          Add New Task
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
+
+      <div className="bg-white p-6 rounded-xl w-96 space-y-4">
+
+        <h2 className="text-lg font-semibold">
+          {existingTask ? "Edit Task" : "Add Task"}
         </h2>
 
-        {/* Title */}
         <input
           type="text"
-          placeholder="Task Title"
+          placeholder="Task title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="w-full p-3 mb-4 bg-slate-800 text-white rounded-lg outline-none"
+          className="w-full border border-neutral-300 rounded-lg px-3 py-2"
         />
 
-        {/* Description */}
         <textarea
-          placeholder="Description (optional)"
+          placeholder="Description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="w-full p-3 mb-4 bg-slate-800 text-white rounded-lg outline-none"
+          className="w-full border border-neutral-300 rounded-lg px-3 py-2"
         />
 
-        {/* Priority */}
         <select
           value={priority}
           onChange={(e) =>
             setPriority(e.target.value as "High" | "Medium" | "Low")
           }
-          className="w-full p-3 mb-4 bg-slate-800 text-white rounded-lg outline-none"
+          className="w-full border border-neutral-300 rounded-lg px-3 py-2"
         >
-          <option value="High">High Priority</option>
-          <option value="Medium">Medium Priority</option>
-          <option value="Low">Low Priority</option>
+          <option>High</option>
+          <option>Medium</option>
+          <option>Low</option>
         </select>
 
-        {/* Due Date */}
         <input
           type="date"
           value={dueDate}
           onChange={(e) => setDueDate(e.target.value)}
-          className="w-full p-3 mb-6 bg-slate-800 text-white rounded-lg outline-none"
+          className="w-full border border-neutral-300 rounded-lg px-3 py-2"
         />
 
-        {/* Buttons */}
-        <div className="flex justify-end gap-4">
+        <div className="flex justify-end gap-3">
+
           <button
             onClick={onClose}
-            className="px-5 py-2 bg-slate-700 rounded-lg hover:bg-slate-600 transition"
+            className="px-3 py-1 border rounded-lg"
           >
             Cancel
           </button>
 
           <button
             onClick={handleSubmit}
-            className="px-5 py-2 bg-indigo-600 rounded-lg hover:bg-indigo-700 transition"
+            className="px-3 py-1 bg-black text-white rounded-lg"
           >
-            Add Task
+            Save
           </button>
+
         </div>
       </div>
     </div>

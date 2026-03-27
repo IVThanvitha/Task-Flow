@@ -1,49 +1,48 @@
 import { useState } from "react";
+import Calendar from "react-calendar";
+import "react-calendar/dist/Calendar.css";
 import { useTasks } from "../context/TaskContext";
 
 const CalendarView = () => {
   const { tasks } = useTasks();
-  const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().split("T")[0]
-  );
+  const [date, setDate] = useState(new Date());
 
-  const tasksForSelectedDate = tasks.filter(
+  const selectedDate = date.toISOString().split("T")[0];
+
+  const tasksForDay = tasks.filter(
     (task) => task.dueDate === selectedDate
   );
 
   return (
-    <div className="bg-slate-900 p-6 rounded-2xl mt-10">
+    <div className="bg-white p-6 rounded-xl shadow border border-neutral-200 mt-10">
+
       <h2 className="text-lg font-semibold mb-4">
-        Calendar View
+        Task Calendar
       </h2>
 
-      {/* Simple Date Picker */}
-      <input
-        type="date"
-        value={selectedDate}
-        onChange={(e) => setSelectedDate(e.target.value)}
-        className="p-3 bg-slate-800 rounded-lg"
-      />
+      <Calendar onChange={(value: any) => setDate(value)} value={date} />
 
       <div className="mt-6">
-        <h3 className="font-semibold">
-          Tasks for {selectedDate}
+
+        <h3 className="font-medium mb-2">
+          Tasks on {selectedDate}
         </h3>
 
-        {tasksForSelectedDate.length === 0 ? (
-          <p className="text-slate-500 mt-2">
-            No tasks scheduled.
+        {tasksForDay.length === 0 && (
+          <p className="text-sm text-neutral-500">
+            No tasks scheduled
           </p>
-        ) : (
-          tasksForSelectedDate.map((task) => (
-            <div
-              key={task.id}
-              className="mt-2 p-3 bg-slate-800 rounded-lg"
-            >
-              {task.title} ({task.priority})
-            </div>
-          ))
         )}
+
+        {tasksForDay.map((task) => (
+          <div
+            key={task.id}
+            className="p-3 border rounded-lg mb-2"
+          >
+            {task.title}
+          </div>
+        ))}
+
       </div>
     </div>
   );
